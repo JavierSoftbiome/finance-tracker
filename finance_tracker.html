@@ -12,11 +12,20 @@
     .container {
       max-width: 800px;
     }
-    #risk-bar {
-      height: 10px;
-      border: 1px solid #eee;
-      transition: width 1s;
-    }
+    /* ... other styles ... */
+#risk-bar-container {
+  width: 100%;
+  height: 10px;
+  border: 1px solid #eee;
+  background-color: #fff;
+}
+#risk-bar {
+  height: 100%;
+  width: 0;
+  background-color: #00FF00;
+  transition: width 1s;
+}
+
     .legend {
       margin-top: 10px;
       font-size: 0.9em;
@@ -119,7 +128,10 @@
                 <span class="col-4 text-right pr-0" id="cash-reserve">N/A USD</span>
               </p>
 
-              <div id="risk-bar"></div>
+              <div id="risk-bar-container">
+                <div id="risk-bar"></div>
+              </div>
+
               <div class="legend">
                 <div><span style="color: #00FF00;">■</span> Low Risk (&lt;65%)</div>
                 <div><span style="color: #FFD700;">■</span> Medium Risk (65-75%)</div>
