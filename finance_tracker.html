@@ -182,6 +182,38 @@
                 riskBar.style.backgroundColor = '#FF0000'; // Red
             }
         });
+        // Function to save input values to localStorage
+function saveInputs() {
+    const debt = document.getElementById('debt').value;
+    const collateral = document.getElementById('collateral').value;
+    const reservePercent = document.getElementById('reserve-percent').value;
+
+    localStorage.setItem('debt', debt);
+    localStorage.setItem('collateral', collateral);
+    localStorage.setItem('reservePercent', reservePercent);
+}
+
+// Function to load input values from localStorage when page loads
+function loadInputs() {
+    if (localStorage.getItem('debt')) {
+        document.getElementById('debt').value = localStorage.getItem('debt');
+    }
+    if (localStorage.getItem('collateral')) {
+        document.getElementById('collateral').value = localStorage.getItem('collateral');
+    }
+    if (localStorage.getItem('reservePercent')) {
+        document.getElementById('reserve-percent').value = localStorage.getItem('reservePercent');
+    }
+}
+
+// Attach event listeners to save data when inputs change
+document.getElementById('debt').addEventListener('input', saveInputs);
+document.getElementById('collateral').addEventListener('input', saveInputs);
+document.getElementById('reserve-percent').addEventListener('input', saveInputs);
+
+// Load stored values when the page loads
+window.addEventListener('load', loadInputs);
+
     </script>
 </body>
 </html>
