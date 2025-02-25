@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Finance Tracker</title>
+  <title>Risk View</title>
   <link
     rel="stylesheet"
     href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
@@ -13,9 +13,9 @@
       max-width: 800px;
     }
 
-    /* Make all .card borders black instead of Bootstrap's default gray */
+    /* Make all .card borders semi-transparent black */
     .card {
-      border: 1px solid black !important;
+      border: 1px solid rgba(0, 0, 0, 0.5) !important; 
     }
 
     /* Risk bar container with a light border & default height of 10px */
@@ -42,18 +42,18 @@
 </head>
 <body>
   <div class="container mt-4">
-    
     <!-- Row for the main title & ETH price so they align with the card columns -->
     <div class="row">
       <div class="col-12">
-        <h1>Finance Tracker</h1>
+        <!-- Updated Title -->
+        <h1>Risk View</h1>
         <p>
           Current ETH Price:
           <strong><span id="eth-price">Loading...</span></strong>
         </p>
       </div>
     </div>
-    
+
     <!-- Main content row: left (inputs) and right (results) -->
     <div class="row">
       <!-- Input Section -->
@@ -122,7 +122,8 @@
               </p>
 
               <p class="row">
-                <span class="col-8">Required Cash Reserve:</span>
+                <!-- Updated to "Recommended Cash Reserve" -->
+                <span class="col-8">Recommended Cash Reserve:</span>
                 <span class="col-4 text-right" id="cash-reserve">N/A USD</span>
               </p>
 
@@ -144,7 +145,6 @@
           </div>
         </div>
       </div>
-      
     </div><!-- /row -->
   </div><!-- /container -->
 
@@ -255,7 +255,7 @@
         document.getElementById("eth-price-limit-row").style.display = "none";
       }
 
-      // Required Cash Reserve
+      // Recommended Cash Reserve
       const cashReserve = (reservePercent / 100) * debt;
       document.getElementById("cash-reserve").textContent =
         isNaN(cashReserve)
