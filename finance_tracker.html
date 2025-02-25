@@ -160,7 +160,7 @@
             let liquidationRisk;
             if (ethPrice > liquidationPrice) {
                 const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
-                liquidationRisk = `Safe until ETH drops by ${dropAllowed.toFixed(2)}% to $${liquidationPrice.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+                liquidationRisk = `${dropAllowed.toFixed(2)}% to $${liquidationPrice.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
             } else {
                 liquidationRisk = 'Currently at risk of liquidation';
             }
