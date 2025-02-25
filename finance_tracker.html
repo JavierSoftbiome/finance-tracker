@@ -15,7 +15,7 @@
 
     /* Make all .card borders semi-transparent black */
     .card {
-      border: 1px solid rgba(0, 0, 0, 0.5) !important; 
+      border: 1px solid rgba(0, 0, 0, 0.5) !important;
     }
 
     /* Risk bar container with a light border & default height of 10px */
@@ -42,10 +42,9 @@
 </head>
 <body>
   <div class="container mt-4">
-    <!-- Row for the main title & ETH price so they align with the card columns -->
-    <div class="row">
+    <!-- Title & ETH Price Row with Left Padding -->
+    <div class="row pl-3">
       <div class="col-12">
-        <!-- Updated Title -->
         <h1>Risk View</h1>
         <p>
           Current ETH Price:
@@ -54,11 +53,11 @@
       </div>
     </div>
 
-    <!-- Main content row: left (inputs) and right (results) -->
-    <div class="row">
-      <!-- Input Section -->
-      <div class="col-md-6">
-        <div class="card">
+    <!-- Main row with align-items-stretch to match heights -->
+    <div class="row align-items-stretch">
+      <!-- LEFT COLUMN: Input Section -->
+      <div class="col-md-6 d-flex">
+        <div class="card flex-fill">
           <div class="card-body">
             <div class="form-group">
               <label for="debt">Debt (USD):</label>
@@ -94,40 +93,34 @@
                 step="1"
               />
             </div>
-            <!-- No "Calculate" button: auto-calculates -->
           </div>
         </div>
       </div>
 
-      <!-- Results Section -->
-      <div class="col-md-6">
-        <div class="card">
+      <!-- RIGHT COLUMN: Results Section -->
+      <div class="col-md-6 d-flex">
+        <div class="card flex-fill">
           <div class="card-body">
             <div id="results">
               <p class="row">
                 <span class="col-8">Collateral Value:</span>
                 <span class="col-4 text-right" id="collateral-value-result">N/A USD</span>
               </p>
-
-              <!-- Liquidation Risk Row (percentage or "Currently at risk") -->
               <p class="row">
                 <span class="col-8">Liquidation Risk:</span>
                 <span class="col-4 text-right" id="liquidation-risk">N/A</span>
               </p>
-
               <!-- ETH Price Limit Row (hidden by default) -->
               <p class="row" id="eth-price-limit-row" style="display: none;">
                 <span class="col-8">ETH Price Limit:</span>
                 <span class="col-4 text-right" id="eth-price-limit-value">N/A</span>
               </p>
-
               <p class="row">
-                <!-- Updated to "Recommended Cash Reserve" -->
                 <span class="col-8">Recommended Cash Reserve:</span>
                 <span class="col-4 text-right" id="cash-reserve">N/A USD</span>
               </p>
 
-              <!-- Risk Bar Container in a new row for full width alignment -->
+              <!-- Risk Bar Container -->
               <div class="row">
                 <div class="col-12">
                   <div id="risk-bar-container">
