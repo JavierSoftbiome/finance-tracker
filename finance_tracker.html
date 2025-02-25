@@ -23,10 +23,9 @@
     }
     /* Pull the "Results" header up more */
     .card-body h2 {
-      margin-top: -20px; /* Increase if you want it even higher */
+      margin-top: -20px; /* Adjust as needed */
     }
-
-    /* Optional: remove or reduce right padding in the card body if you want truly flush alignment */
+    /* Optional: remove or reduce right padding for truly flush alignment */
     /* .card-body {
       padding-right: 0 !important;
     } */
@@ -81,7 +80,7 @@
                 step="1"
               />
             </div>
-            <!-- No "Calculate" button needed: auto-calculates -->
+            <!-- No "Calculate" button: auto-calculates -->
           </div>
         </div>
       </div>
@@ -98,14 +97,28 @@
                   N/A USD
                 </span>
               </p>
+
+              <!-- 1) Liquidation Risk Row (percentage or "Currently at risk") -->
               <p class="row">
                 <span class="col-8">Liquidation Risk:</span>
-                <span class="col-4 text-right pr-0" id="liquidation-risk">N/A</span>
+                <span class="col-4 text-right pr-0" id="liquidation-risk">
+                  N/A
+                </span>
               </p>
+
+              <!-- 2) ETH Price Limit Row (hidden by default, shows only if not currently at risk) -->
+              <p class="row" id="eth-price-limit-row" style="display: none;">
+                <span class="col-8">ETH Price Limit:</span>
+                <span class="col-4 text-right pr-0" id="eth-price-limit-value">
+                  N/A
+                </span>
+              </p>
+
               <p class="row">
                 <span class="col-8">Required Cash Reserve:</span>
                 <span class="col-4 text-right pr-0" id="cash-reserve">N/A USD</span>
               </p>
+
               <div id="risk-bar"></div>
               <div class="legend">
                 <div><span style="color: #00FF00;">■</span> Low Risk (&lt;65%)</div>
@@ -193,8 +206,10 @@
           maximumFractionDigits: 0,
         }) + " USD";
 
+      // If collateral is zero, reset fields
       if (collateral === 0) {
         document.getElementById("liquidation-risk").textContent = "N/A";
+        document.getElementById("eth-price-limit-row").style.display = "none";
         document.getElementById("cash-reserve").textContent = "N/A USD";
         const riskBar = document.getElementById("risk-bar");
         riskBar.style.width = "0%";
@@ -202,7 +217,7 @@
         return;
       }
 
-      // Calculate ratio (used for risk bar color)
+      // Calculate ratio (for risk bar color)
       const ratio = (debt / collateralValue) * 100;
       const riskBar = document.getElementById("risk-bar");
       const barWidth = Math.min(ratio, 100); // Cap at 100%
@@ -215,32 +230,33 @@
         riskBar.style.backgroundColor = "#FF0000"; // Red
       }
 
-      // Calculate liquidation risk
+      // Liquidation risk calculations
       const liquidationPrice = debt / (0.9 * collateral);
       if (ethPrice > liquidationPrice) {
+        // How much ETH can drop before liquidation
         const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
-        const formattedDrop = dropAllowed.toFixed(2) + "%";
-        const formattedLimit =
-          "ETH Price Limit  $" +
-          liquidationPrice.toLocaleString("en-US", {
-            style: "decimal",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          });
+        // 1) Set Liquidation Risk row to the percentage
+        document.getElementById("liquidation-risk").textContent =
+          dropAllowed.toFixed(2) + "%";
 
-        // Use a FLEX container to ensure both lines are perfectly right-aligned
-        document.getElementById("liquidation-risk").innerHTML = `
-          <div style="display: flex; flex-direction: column; align-items: flex-end;">
-            <span>${formattedDrop}</span>
-            <span style="white-space: nowrap;">${formattedLimit}</span>
-          </div>
-        `;
+        // 2) Show "ETH Price Limit" row
+        const limitValue = liquidationPrice.toLocaleString("en-US", {
+          style: "decimal",
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0,
+        });
+        document.getElementById("eth-price-limit-row").style.display = "flex";
+        document.getElementById("eth-price-limit-value").textContent =
+          "$" + limitValue;
       } else {
+        // If we are already at or below liquidation threshold
         document.getElementById("liquidation-risk").textContent =
           "Currently at risk of liquidation";
+        // Hide "ETH Price Limit" row
+        document.getElementById("eth-price-limit-row").style.display = "none";
       }
 
-      // Calculate required cash reserve
+      // Required Cash Reserve
       const cashReserve = (reservePercent / 100) * debt;
       document.getElementById("cash-reserve").textContent =
         cashReserve.toLocaleString("en-US", {
