@@ -76,8 +76,8 @@
                             <div id="risk-bar"></div>
                             <div class="legend">
                                 <div><span style="color: #00FF00;">■</span> Low Risk (<65%)</div>
-                                <div><span style="color: #FFD700;">■</span> Medium Risk (65-85%)</div>
-                                <div><span style="color: #FF0000;">■</span> High Risk (>85%)</div>
+                                <div><span style="color: #FFD700;">■</span> Medium Risk (65-75%)</div>
+                                <div><span style="color: #FF0000;">■</span> High Risk (>75%)</div>
                             </div>
                         </div>
                     </div>
@@ -175,7 +175,7 @@
             riskBar.style.width = `${barWidth}%`;
             if (ratio < 65) {
                 riskBar.style.backgroundColor = '#00FF00'; // Green
-            } else if (ratio < 85) {
+            } else if (ratio < 75) {
                 riskBar.style.backgroundColor = '#FFD700'; // Yellow
             } else {
                 riskBar.style.backgroundColor = '#FF0000'; // Red
