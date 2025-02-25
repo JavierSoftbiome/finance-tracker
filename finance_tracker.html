@@ -1,218 +1,228 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Tracker</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        .container {
-            max-width: 800px;
-        }
-        #risk-bar {
-            height: 20px;
-            border: 1px solid #ccc;
-            transition: width 1s;
-
-
-        }
-        .legend {
-            margin-top: 10px;
-            font-size: 0.9em;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Finance Tracker</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .container {
+      max-width: 800px;
+    }
+    #risk-bar {
+      height: 20px;
+      border: 1px solid #ccc;
+      transition: width 1s;
+    }
+    .legend {
+      margin-top: 10px;
+      font-size: 0.9em;
+    }
+  </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h1>Finance Tracker</h1>
-        <p>Current ETH Price: <strong><span id="eth-price">Loading...</span></strong></p>
-        <div class="row">
-            <!-- Input Section -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label for="debt">Debt (USD):</label>
-                            <input type="number" id="debt" class="form-control" min="0" step="100" placeholder="Enter debt in USD">
-                        </div>
-                        <div class="form-group">
-                            <label for="collateral">Collateral (ETH): <span id="collateral-usd">[Waiting for input/price]</span></label>
-                            <input type="number" id="collateral" class="form-control" min="0" step="0.1" placeholder="Enter collateral in ETH">
-                        </div>
-                        <div class="form-group">
-                            <label for="reserve-percent">Cash Reserve Percentage (%):</label>
-                            <input type="number" id="reserve-percent" class="form-control" value="30" min="0" max="100" step="1">
-                        </div>
-                        <button id="calculate-btn" class="btn btn-primary">Calculate</button>
-                    </div>
-                </div>
+  <div class="container mt-4">
+    <h1>Finance Tracker</h1>
+    <p>Current ETH Price: <strong><span id="eth-price">Loading...</span></strong></p>
+    <div class="row">
+      <!-- Input Section -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <div class="form-group">
+              <label for="debt">Debt (USD):</label>
+              <input type="number" id="debt" class="form-control" min="0" step="100" placeholder="Enter debt in USD">
             </div>
-            <!-- Results Section -->
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h2>Results</h2>
-                        <div id="results">
-                            <p class="row">
-                                <span class="col-8">Collateral Value:</span>
-                                <span class="col-4 text-right" id="collateral-value-result">N/A USD</span>
-                            </p>
-                            
-                            <p class="row">
-                                <span class="col-8">Liquidation Risk:</span>
-                                <span class="col-4 text-right" id="liquidation-risk">N/A</span>
-                            </p>
-                            <p class="row">
-                                <span class="col-8">Required Cash Reserve:</span>
-                                <span class="col-4 text-right" id="cash-reserve">N/A USD</span>
-                            </p>
-                            <p class="row">
-                                <span class="col-8">Debt-to-Collateral:</span>
-                                <span class="col-4 text-right" id="risk-level">N/A %</span>
-                            </p>
-                            <div id="risk-bar"></div>
-                            <div class="legend">
-                                <div><span style="color: #00FF00;">■</span> Low Risk (<65%)</div>
-                                <div><span style="color: #FFD700;">■</span> Medium Risk (65-75%)</div>
-                                <div><span style="color: #FF0000;">■</span> High Risk (>75%)</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="form-group">
+              <label for="collateral">
+                Collateral (ETH):
+                <span id="collateral-usd">[Waiting for input/price]</span>
+              </label>
+              <input type="number" id="collateral" class="form-control" min="0" step="0.1" placeholder="Enter collateral in ETH">
             </div>
+            <div class="form-group">
+              <label for="reserve-percent">Cash Reserve Percentage (%):</label>
+              <input type="number" id="reserve-percent" class="form-control" value="30" min="0" max="100" step="1">
+            </div>
+            <!-- The Calculate button has been removed for auto-calculation -->
+          </div>
         </div>
+      </div>
+      <!-- Results Section -->
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-body">
+            <h2>Results</h2>
+            <div id="results">
+              <p class="row">
+                <span class="col-8">Collateral Value:</span>
+                <span class="col-4 text-right" id="collateral-value-result">N/A USD</span>
+              </p>
+              <p class="row">
+                <span class="col-8">Liquidation Risk:</span>
+                <span class="col-4 text-right" id="liquidation-risk">N/A</span>
+              </p>
+              <p class="row">
+                <span class="col-8">Required Cash Reserve:</span>
+                <span class="col-4 text-right" id="cash-reserve">N/A USD</span>
+              </p>
+              <div id="risk-bar"></div>
+              <div class="legend">
+                <div><span style="color: #00FF00;">■</span> Low Risk (&lt;65%)</div>
+                <div><span style="color: #FFD700;">■</span> Medium Risk (65-75%)</div>
+                <div><span style="color: #FF0000;">■</span> High Risk (&gt;75%)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <script>
-        let ethPrice = null;
+  </div>
 
-        // Fetch ETH price from CoinGecko API
-        async function fetchEthPrice() {
-            try {
-                const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
-                const data = await response.json();
-                ethPrice = data.ethereum.usd;
-                document.getElementById('eth-price').textContent = ethPrice.toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 });
-                updateCollateralUsd();
-            } catch (error) {
-                console.error('Error fetching ETH price:', error);
-                document.getElementById('eth-price').textContent = 'Error';
-            }
-        }
+  <script>
+    let ethPrice = null;
 
-        // Initial fetch and update every 60 seconds
-        fetchEthPrice();
-        setInterval(fetchEthPrice, 60000);
-
-        // Update collateral USD value next to input box
-        function updateCollateralUsd() {
-            const collateral = parseFloat(document.getElementById('collateral').value);
-            if (!isNaN(collateral) && ethPrice !== null) {
-                const collateralValue = collateral * ethPrice;
-                document.getElementById('collateral-usd').textContent = `${collateralValue.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })} USD`;
-            } else {
-                document.getElementById('collateral-usd').textContent = 'N/A';
-            }
-        }
-
-        // Listen for changes in collateral input
-        document.getElementById('collateral').addEventListener('input', updateCollateralUsd);
-
-        // Calculate button event listener
-        document.getElementById('calculate-btn').addEventListener('click', () => {
-            const debt = parseFloat(document.getElementById('debt').value);
-            const collateral = parseFloat(document.getElementById('collateral').value);
-            const reservePercent = parseFloat(document.getElementById('reserve-percent').value);
-
-            // Check if inputs are valid
-            if (isNaN(debt) || isNaN(collateral) || isNaN(reservePercent)) {
-                alert('Please enter valid numbers in all fields.');
-                return;
-            }
-            if (ethPrice === null) {
-                alert('ETH price is not available. Please try again later.');
-                return;
-            }
-
-            // Perform calculations
-            const collateralValue = collateral * ethPrice;
-            document.getElementById('collateral-value-result').textContent = `${collateralValue.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })} USD`;
-
-            if (collateral === 0) {
-                document.getElementById('ratio').textContent = 'N/A %';
-                document.getElementById('liquidation-risk').textContent = 'N/A';
-                document.getElementById('cash-reserve').textContent = 'N/A USD';
-                document.getElementById('risk-level').textContent = 'N/A %';
-                const riskBar = document.getElementById('risk-bar');
-                riskBar.style.width = '0%';
-                riskBar.style.backgroundColor = 'grey';
-                return;
-            }
-
-            const ratio = (debt / collateralValue) * 100;
-            const ratioElement = document.getElementById('ratio');
-            if (ratioElement) {
-                ratioElement.textContent = `${ratio.toFixed(2)} %`;
-}
-
-            document.getElementById('risk-level').textContent = `${ratio.toFixed(2)} %`;
-
-            // Liquidation risk calculation (liquidation at 90% collateral value)
-            const liquidationPrice = debt / (0.9 * collateral);
-            let liquidationRisk;
-            if (ethPrice > liquidationPrice) {
-                const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
-                liquidationRisk = `${dropAllowed.toFixed(2)}% to $${liquidationPrice.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
-            } else {
-                liquidationRisk = 'Currently at risk of liquidation';
-            }
-            document.getElementById('liquidation-risk').textContent = liquidationRisk;
-
-            const cashReserve = (reservePercent / 100) * debt;
-            document.getElementById('cash-reserve').textContent = `${cashReserve.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })} USD`;
-
-            // Update risk bar
-            const riskBar = document.getElementById('risk-bar');
-            const barWidth = Math.min(ratio, 100); // Cap at 100%
-            riskBar.style.width = `${barWidth}%`;
-            if (ratio < 65) {
-                riskBar.style.backgroundColor = '#00FF00'; // Green
-            } else if (ratio < 75) {
-                riskBar.style.backgroundColor = '#FFD700'; // Yellow
-            } else {
-                riskBar.style.backgroundColor = '#FF0000'; // Red
-            }
+    // Fetch ETH price from CoinGecko API
+    async function fetchEthPrice() {
+      try {
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd');
+        const data = await response.json();
+        ethPrice = data.ethereum.usd;
+        document.getElementById('eth-price').textContent = ethPrice.toLocaleString('en-US', {
+          style: 'currency',
+          currency: 'USD',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
         });
-        // Function to save input values to localStorage
-function saveInputs() {
-    const debt = document.getElementById('debt').value;
-    const collateral = document.getElementById('collateral').value;
-    const reservePercent = document.getElementById('reserve-percent').value;
+        updateCollateralUsd();
+        calculate();  // recalc after updating ETH price
+      } catch (error) {
+        console.error('Error fetching ETH price:', error);
+        document.getElementById('eth-price').textContent = 'Error';
+      }
+    }
 
-    localStorage.setItem('debt', debt);
-    localStorage.setItem('collateral', collateral);
-    localStorage.setItem('reservePercent', reservePercent);
-}
+    // Load ETH price on page load
+    fetchEthPrice();
+    setInterval(fetchEthPrice, 60000); // Refresh every 60 seconds
 
-// Function to load input values from localStorage when page loads
-function loadInputs() {
-    if (localStorage.getItem('debt')) {
+    // Update collateral USD value next to input box
+    function updateCollateralUsd() {
+      const collateral = parseFloat(document.getElementById('collateral').value);
+      if (!isNaN(collateral) && ethPrice !== null) {
+        const collateralValue = collateral * ethPrice;
+        document.getElementById('collateral-usd').textContent =
+          `${collateralValue.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })} USD`;
+      } else {
+        document.getElementById('collateral-usd').textContent = 'N/A';
+      }
+    }
+
+    // Auto-calculation function
+    function calculate() {
+      const debt = parseFloat(document.getElementById('debt').value);
+      const collateral = parseFloat(document.getElementById('collateral').value);
+      const reservePercent = parseFloat(document.getElementById('reserve-percent').value);
+
+      if (isNaN(debt) || isNaN(collateral) || isNaN(reservePercent)) {
+        // If any field is empty or invalid, do nothing
+        return;
+      }
+
+      if (ethPrice === null) {
+        alert('ETH price is not available. Please try again later.');
+        return;
+      }
+
+      const collateralValue = collateral * ethPrice;
+      document.getElementById('collateral-value-result').textContent =
+        `${collateralValue.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })} USD`;
+
+      if (collateral === 0) {
+        document.getElementById('liquidation-risk').textContent = 'N/A';
+        document.getElementById('cash-reserve').textContent = 'N/A USD';
+        const riskBar = document.getElementById('risk-bar');
+        riskBar.style.width = '0%';
+        riskBar.style.backgroundColor = 'grey';
+        return;
+      }
+
+      // Calculate ratio (used for risk bar color)
+      const ratio = (debt / collateralValue) * 100;
+      const riskBar = document.getElementById('risk-bar');
+      const barWidth = Math.min(ratio, 100); // Cap at 100%
+      riskBar.style.width = `${barWidth}%`;
+      if (ratio < 65) {
+        riskBar.style.backgroundColor = '#00FF00'; // Green
+      } else if (ratio < 75) {
+        riskBar.style.backgroundColor = '#FFD700'; // Yellow
+      } else {
+        riskBar.style.backgroundColor = '#FF0000'; // Red
+      }
+
+      // Calculate liquidation risk
+      const liquidationPrice = debt / (0.9 * collateral);
+      if (ethPrice > liquidationPrice) {
+        const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
+        const formattedDrop = dropAllowed.toFixed(2) + '%';
+        const formattedLimit = 'ETH Price Limit  $' + liquidationPrice.toLocaleString('en-US', {
+          style: 'decimal',
+          minimumFractionDigits: 0,
+          maximumFractionDigits: 0
+        });
+        // Display on two lines using innerHTML
+        document.getElementById('liquidation-risk').innerHTML = `${formattedDrop}<br>${formattedLimit}`;
+      } else {
+        document.getElementById('liquidation-risk').textContent = 'Currently at risk of liquidation';
+      }
+
+      const cashReserve = (reservePercent / 100) * debt;
+      document.getElementById('cash-reserve').textContent =
+        `${cashReserve.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })} USD`;
+    }
+
+    // Save input values to localStorage
+    function saveInputs() {
+      localStorage.setItem('debt', document.getElementById('debt').value);
+      localStorage.setItem('collateral', document.getElementById('collateral').value);
+      localStorage.setItem('reservePercent', document.getElementById('reserve-percent').value);
+    }
+
+    // Load input values from localStorage and auto-calculate
+    function loadInputs() {
+      if (localStorage.getItem('debt')) {
         document.getElementById('debt').value = localStorage.getItem('debt');
-    }
-    if (localStorage.getItem('collateral')) {
+      }
+      if (localStorage.getItem('collateral')) {
         document.getElementById('collateral').value = localStorage.getItem('collateral');
-    }
-    if (localStorage.getItem('reservePercent')) {
+      }
+      if (localStorage.getItem('reservePercent')) {
         document.getElementById('reserve-percent').value = localStorage.getItem('reservePercent');
+      }
+      calculate();
     }
-}
 
-// Attach event listeners to save data when inputs change
-document.getElementById('debt').addEventListener('input', saveInputs);
-document.getElementById('collateral').addEventListener('input', saveInputs);
-document.getElementById('reserve-percent').addEventListener('input', saveInputs);
+    // Attach event listeners to save inputs and recalc when values change
+    document.getElementById('debt').addEventListener('input', () => {
+      saveInputs();
+      calculate();
+    });
+    document.getElementById('collateral').addEventListener('input', () => {
+      updateCollateralUsd();
+      saveInputs();
+      calculate();
+    });
+    document.getElementById('reserve-percent').addEventListener('input', () => {
+      saveInputs();
+      calculate();
+    });
 
-// Load stored values when the page loads
-window.addEventListener('load', loadInputs);
+    // Load stored values when the page loads
+    window.addEventListener('load', loadInputs);
+  </script>
+</body>
+</html>
+
 
     </script>
 </body>
