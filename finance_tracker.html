@@ -12,19 +12,22 @@
     .container {
       max-width: 800px;
     }
-    /* ... other styles ... */
-#risk-bar-container {
-  width: 100%;
-  height: 10px;
-  border: 1px solid #eee;
-  background-color: #fff;
-}
-#risk-bar {
-  height: 100%;
-  width: 0;
-  background-color: #00FF00;
-  transition: width 1s;
-}
+
+    /* Risk bar container has a light border & default height of 10px */
+    #risk-bar-container {
+      width: 100%;
+      height: 10px;
+      border: 1px solid #eee; /* Lighter border color */
+      background-color: #fff; /* White background so bar fill is visible */
+      margin-top: 10px;       /* Spacing above the bar */
+    }
+    /* Inner bar that changes width & color based on risk */
+    #risk-bar {
+      height: 100%;
+      width: 0;               /* JS updates this dynamically */
+      background-color: #00FF00; /* Default color, overwritten by JS logic */
+      transition: width 1s;   /* Smooth width animation */
+    }
 
     .legend {
       margin-top: 10px;
@@ -32,12 +35,8 @@
     }
     /* Pull the "Results" header up more */
     .card-body h2 {
-      margin-top: -20px; /* Adjust as needed */
+      margin-top: -20px; /* Increase if you want it higher still */
     }
-    /* Optional: remove or reduce right padding for truly flush alignment */
-    /* .card-body {
-      padding-right: 0 !important;
-    } */
   </style>
 </head>
 <body>
@@ -89,7 +88,7 @@
                 step="1"
               />
             </div>
-            <!-- No "Calculate" button: auto-calculates -->
+            <!-- No "Calculate" button needed: auto-calculates -->
           </div>
         </div>
       </div>
@@ -102,34 +101,34 @@
             <div id="results">
               <p class="row">
                 <span class="col-8">Collateral Value:</span>
-                <span class="col-4 text-right pr-0" id="collateral-value-result">
-                  N/A USD
-                </span>
+                <!-- Removed pr-0, using default Bootstrap padding -->
+                <span class="col-4 text-right" id="collateral-value-result">N/A USD</span>
               </p>
 
-              <!-- 1) Liquidation Risk Row (percentage or "Currently at risk") -->
+              <!-- Liquidation Risk Row (percentage or "Currently at risk") -->
               <p class="row">
                 <span class="col-8">Liquidation Risk:</span>
-                <span class="col-4 text-right pr-0" id="liquidation-risk">
-                  N/A
-                </span>
+                <span class="col-4 text-right" id="liquidation-risk">N/A</span>
               </p>
 
-              <!-- 2) ETH Price Limit Row (hidden by default, shows only if not currently at risk) -->
+              <!-- ETH Price Limit Row (hidden by default) -->
               <p class="row" id="eth-price-limit-row" style="display: none;">
                 <span class="col-8">ETH Price Limit:</span>
-                <span class="col-4 text-right pr-0" id="eth-price-limit-value">
-                  N/A
-                </span>
+                <span class="col-4 text-right" id="eth-price-limit-value">N/A</span>
               </p>
 
               <p class="row">
-                <span class="col-8">Required Cash Reserve:</span>
-                <span class="col-4 text-right pr-0" id="cash-reserve">N/A USD</span>
+                <span class="col-8">Recommended Cash Reserve:</span>
+                <span class="col-4 text-right" id="cash-reserve">N/A USD</span>
               </p>
 
-              <div id="risk-bar-container">
-                <div id="risk-bar"></div>
+              <!-- Risk Bar Container in a new row for full width alignment -->
+              <div class="row">
+                <div class="col-12">
+                  <div id="risk-bar-container">
+                    <div id="risk-bar"></div>
+                  </div>
+                </div>
               </div>
 
               <div class="legend">
@@ -218,7 +217,6 @@
           maximumFractionDigits: 0,
         }) + " USD";
 
-      // If collateral is zero, reset fields
       if (collateral === 0) {
         document.getElementById("liquidation-risk").textContent = "N/A";
         document.getElementById("eth-price-limit-row").style.display = "none";
@@ -229,11 +227,12 @@
         return;
       }
 
-      // Calculate ratio (for risk bar color)
+      // Calculate ratio (used for risk bar color)
       const ratio = (debt / collateralValue) * 100;
       const riskBar = document.getElementById("risk-bar");
       const barWidth = Math.min(ratio, 100); // Cap at 100%
       riskBar.style.width = `${barWidth}%`;
+
       if (ratio < 65) {
         riskBar.style.backgroundColor = "#00FF00"; // Green
       } else if (ratio < 75) {
@@ -242,16 +241,15 @@
         riskBar.style.backgroundColor = "#FF0000"; // Red
       }
 
-      // Liquidation risk calculations
+      // Calculate liquidation risk
       const liquidationPrice = debt / (0.9 * collateral);
       if (ethPrice > liquidationPrice) {
-        // How much ETH can drop before liquidation
         const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
-        // 1) Set Liquidation Risk row to the percentage
+        // 1) Show the drop percentage in the Liquidation Risk row
         document.getElementById("liquidation-risk").textContent =
           dropAllowed.toFixed(2) + "%";
 
-        // 2) Show "ETH Price Limit" row
+        // 2) Show the "ETH Price Limit" row
         const limitValue = liquidationPrice.toLocaleString("en-US", {
           style: "decimal",
           minimumFractionDigits: 0,
@@ -261,10 +259,9 @@
         document.getElementById("eth-price-limit-value").textContent =
           "$" + limitValue;
       } else {
-        // If we are already at or below liquidation threshold
+        // Already at risk
         document.getElementById("liquidation-risk").textContent =
           "Currently at risk of liquidation";
-        // Hide "ETH Price Limit" row
         document.getElementById("eth-price-limit-row").style.display = "none";
       }
 
