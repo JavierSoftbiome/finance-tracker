@@ -13,6 +13,11 @@
       max-width: 800px;
     }
 
+    /* Make all .card borders black instead of Bootstrap's default gray */
+    .card {
+      border: 1px solid black !important;
+    }
+
     /* Risk bar container with a light border & default height of 10px */
     #risk-bar-container {
       width: 100%;
@@ -24,9 +29,9 @@
     /* Inner bar that changes width & color based on risk */
     #risk-bar {
       height: 100%;
-      width: 0;               /* JS updates this dynamically */
-      background-color: #00FF00; /* Default color, overwritten by JS logic */
-      transition: width 1s;   /* Smooth width animation */
+      width: 0;                 /* JS updates this dynamically */
+      background-color: #00FF00;/* Default color, overwritten by JS logic */
+      transition: width 1s;     /* Smooth width animation */
     }
 
     .legend {
@@ -43,11 +48,14 @@
 </head>
 <body>
   <div class="container mt-4">
-    <h1>Finance Tracker</h1>
-    <p>
+    <!-- Left-align main title -->
+    <h1 class="text-left">Finance Tracker</h1>
+    <!-- Left-align ETH price -->
+    <p class="text-left">
       Current ETH Price:
       <strong><span id="eth-price">Loading...</span></strong>
     </p>
+
     <div class="row">
       <!-- Input Section -->
       <div class="col-md-6">
@@ -65,7 +73,6 @@
               />
             </div>
             <div class="form-group">
-              <!-- Removed the USD span here -->
               <label for="collateral">Collateral (ETH):</label>
               <input
                 type="number"
@@ -97,8 +104,6 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-body">
-            <!-- Removed <h2>Results</h2> -->
-
             <div id="results">
               <p class="row">
                 <span class="col-8">Collateral Value:</span>
