@@ -99,7 +99,7 @@
           maximumFractionDigits: 0
         });
         updateCollateralUsd();
-        calculate();  // recalc after updating ETH price
+        calculate();  // Recalculate after updating ETH price
       } catch (error) {
         console.error('Error fetching ETH price:', error);
         document.getElementById('eth-price').textContent = 'Error';
@@ -169,13 +169,14 @@
       if (ethPrice > liquidationPrice) {
         const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
         const formattedDrop = dropAllowed.toFixed(2) + '%';
-        const formattedLimit = 'ETH Price Limit  $' + liquidationPrice.toLocaleString('en-US', {
+        const formattedLimit = 'ETH Price Limit $' + liquidationPrice.toLocaleString('en-US', {
           style: 'decimal',
           minimumFractionDigits: 0,
           maximumFractionDigits: 0
         });
-        // Display on two lines using innerHTML
-        document.getElementById('liquidation-risk').innerHTML = `${formattedDrop}<br>${formattedLimit}`;
+        // Display on two lines with the second line kept together
+        document.getElementById('liquidation-risk').innerHTML =
+          `${formattedDrop}<br><span style="white-space: nowrap;">${formattedLimit}</span>`;
       } else {
         document.getElementById('liquidation-risk').textContent = 'Currently at risk of liquidation';
       }
@@ -226,6 +227,7 @@
   </script>
 </body>
 </html>
+
 
 
     </script>
