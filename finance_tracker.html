@@ -13,7 +13,7 @@
       max-width: 800px;
     }
 
-    /* Risk bar container has a light border & default height of 10px */
+    /* Risk bar container with a light border & default height of 10px */
     #risk-bar-container {
       width: 100%;
       height: 10px;
@@ -33,10 +33,12 @@
       margin-top: 10px;
       font-size: 0.9em;
     }
-    /* Pull the "Results" header up more */
-    .card-body h2 {
-      margin-top: -20px; /* Increase if you want it higher still */
+
+    /* Optional: remove or reduce right padding if you want it truly flush
+    .card-body {
+      padding-right: 0 !important;
     }
+    */
   </style>
 </head>
 <body>
@@ -63,10 +65,8 @@
               />
             </div>
             <div class="form-group">
-              <label for="collateral">
-                Collateral (ETH):
-                <span id="collateral-usd">[Waiting for input/price]</span>
-              </label>
+              <!-- Removed the USD span here -->
+              <label for="collateral">Collateral (ETH):</label>
               <input
                 type="number"
                 id="collateral"
@@ -88,7 +88,7 @@
                 step="1"
               />
             </div>
-            <!-- No "Calculate" button needed: auto-calculates -->
+            <!-- No "Calculate" button: auto-calculates -->
           </div>
         </div>
       </div>
@@ -97,11 +97,11 @@
       <div class="col-md-6">
         <div class="card">
           <div class="card-body">
-            <h2>Results</h2>
+            <!-- Removed <h2>Results</h2> -->
+
             <div id="results">
               <p class="row">
                 <span class="col-8">Collateral Value:</span>
-                <!-- Removed pr-0, using default Bootstrap padding -->
                 <span class="col-4 text-right" id="collateral-value-result">N/A USD</span>
               </p>
 
@@ -163,7 +163,6 @@
             maximumFractionDigits: 0,
           }
         );
-        updateCollateralUsd();
         calculate(); // Recalculate after updating ETH price
       } catch (error) {
         console.error("Error fetching ETH price:", error);
@@ -174,22 +173,6 @@
     // Load ETH price on page load
     fetchEthPrice();
     setInterval(fetchEthPrice, 60000); // Refresh every 60 seconds
-
-    // Update collateral USD value next to input box
-    function updateCollateralUsd() {
-      const collateral = parseFloat(document.getElementById("collateral").value);
-      if (!isNaN(collateral) && ethPrice !== null) {
-        const collateralValue = collateral * ethPrice;
-        document.getElementById("collateral-usd").textContent =
-          collateralValue.toLocaleString("en-US", {
-            style: "decimal",
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }) + " USD";
-      } else {
-        document.getElementById("collateral-usd").textContent = "N/A";
-      }
-    }
 
     // Auto-calculation function
     function calculate() {
@@ -209,13 +192,16 @@
         return;
       }
 
+      // Collateral Value in USD
       const collateralValue = collateral * ethPrice;
       document.getElementById("collateral-value-result").textContent =
-        collateralValue.toLocaleString("en-US", {
-          style: "decimal",
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }) + " USD";
+        isNaN(collateralValue)
+          ? "N/A USD"
+          : collateralValue.toLocaleString("en-US", {
+              style: "decimal",
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }) + " USD";
 
       if (collateral === 0) {
         document.getElementById("liquidation-risk").textContent = "N/A";
@@ -245,11 +231,10 @@
       const liquidationPrice = debt / (0.9 * collateral);
       if (ethPrice > liquidationPrice) {
         const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
-        // 1) Show the drop percentage in the Liquidation Risk row
         document.getElementById("liquidation-risk").textContent =
           dropAllowed.toFixed(2) + "%";
 
-        // 2) Show the "ETH Price Limit" row
+        // Show the "ETH Price Limit" row
         const limitValue = liquidationPrice.toLocaleString("en-US", {
           style: "decimal",
           minimumFractionDigits: 0,
@@ -268,11 +253,13 @@
       // Required Cash Reserve
       const cashReserve = (reservePercent / 100) * debt;
       document.getElementById("cash-reserve").textContent =
-        cashReserve.toLocaleString("en-US", {
-          style: "decimal",
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        }) + " USD";
+        isNaN(cashReserve)
+          ? "N/A USD"
+          : cashReserve.toLocaleString("en-US", {
+              style: "decimal",
+              minimumFractionDigits: 0,
+              maximumFractionDigits: 0,
+            }) + " USD";
     }
 
     // Save input values to localStorage
@@ -307,7 +294,6 @@
       calculate();
     });
     document.getElementById("collateral").addEventListener("input", () => {
-      updateCollateralUsd();
       saveInputs();
       calculate();
     });
