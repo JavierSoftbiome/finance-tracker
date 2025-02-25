@@ -73,9 +73,9 @@
                             </p>
                             <div id="risk-bar"></div>
                             <div class="legend">
-                                <span style="color: #00FF00;">■</span> Low Risk (<70%)
-                                <span style="color: #FFFF00;">■</span> Medium Risk (70-85%)
-                                <span style="color: #FF0000;">■</span> High Risk (>85%)
+                                <div><span style="color: #00FF00;">■</span> Low Risk (<65%)</div>
+                                <div><span style="color: #FFFF00;">■</span> Medium Risk (65-85%)</div>
+                                <div><span style="color: #FF0000;">■</span> High Risk (>85%)</div>
                             </div>
                         </div>
                     </div>
@@ -164,7 +164,7 @@
             }
             document.getElementById('liquidation-risk').textContent = liquidationRisk;
 
-            const cashReserve = (reservePercent / 100) * collateral;
+            const cashReserve = (reservePercent / 100) * debt;
             document.getElementById('cash-reserve').textContent = `${cashReserve.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })} USD`;
 
             // Update risk bar
