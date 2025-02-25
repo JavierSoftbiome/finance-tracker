@@ -38,24 +38,23 @@
       margin-top: 10px;
       font-size: 0.9em;
     }
-
-    /* Optional: remove or reduce right padding if you want it truly flush
-    .card-body {
-      padding-right: 0 !important;
-    }
-    */
   </style>
 </head>
 <body>
   <div class="container mt-4">
-    <!-- Left-align main title -->
-    <h1 class="text-left">Finance Tracker</h1>
-    <!-- Left-align ETH price -->
-    <p class="text-left">
-      Current ETH Price:
-      <strong><span id="eth-price">Loading...</span></strong>
-    </p>
-
+    
+    <!-- Row for the main title & ETH price so they align with the card columns -->
+    <div class="row">
+      <div class="col-12">
+        <h1>Finance Tracker</h1>
+        <p>
+          Current ETH Price:
+          <strong><span id="eth-price">Loading...</span></strong>
+        </p>
+      </div>
+    </div>
+    
+    <!-- Main content row: left (inputs) and right (results) -->
     <div class="row">
       <!-- Input Section -->
       <div class="col-md-6">
@@ -123,7 +122,7 @@
               </p>
 
               <p class="row">
-                <span class="col-8">Recommended Cash Reserve:</span>
+                <span class="col-8">Required Cash Reserve:</span>
                 <span class="col-4 text-right" id="cash-reserve">N/A USD</span>
               </p>
 
@@ -145,8 +144,9 @@
           </div>
         </div>
       </div>
-    </div>
-  </div>
+      
+    </div><!-- /row -->
+  </div><!-- /container -->
 
   <script>
     let ethPrice = null;
