@@ -164,7 +164,7 @@
             }
             document.getElementById('liquidation-risk').textContent = liquidationRisk;
 
-            const cashReserve = (reservePercent / 100) * collateralValue;
+            const cashReserve = (reservePercent / 100) * debt;
             document.getElementById('cash-reserve').textContent = `${cashReserve.toLocaleString('en-US', { style: 'decimal', minimumFractionDigits: 0, maximumFractionDigits: 0 })} USD`;
 
             // Update risk bar
