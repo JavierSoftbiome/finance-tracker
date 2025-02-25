@@ -230,7 +230,7 @@
       if (ethPrice > liquidationPrice) {
         const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
         document.getElementById("liquidation-risk").textContent =
-          dropAllowed.toFixed(2) + "%";
+          "-" + dropAllowed.toFixed(2) + "%";
 
         // Show the "ETH Price Limit" row
         const limitValue = liquidationPrice.toLocaleString("en-US", {
