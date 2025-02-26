@@ -40,8 +40,7 @@
     /* The ratio label that appears BELOW the bar’s moving right edge */
     #bar-percentage {
       position: absolute;
-      bottom: -25px;
-      transform: translateX(-50%);
+      bottom: -25px;    
       color: #000;
       font-size: 0.8rem;
     }
@@ -282,8 +281,16 @@
       // Move the ratio label to the bar’s end
       const barPercentage = document.getElementById("bar-percentage");
       barPercentage.textContent = rounded.toFixed(0) + "%";
-      barPercentage.style.left = barWidth + "%";
+      barPercentage.style.left = barWidth + "%"; // Align left edge of label with bar’s right edge
 
+      // Adjust label position to prevent overlap with bar
+      const labelWidth = barPercentage.offsetWidth; // Get the label’s width in pixels
+      const containerWidth = document.getElementById("risk-bar-container").offsetWidth;
+      const labelPositionPx = (barWidth / 100) * containerWidth; // Convert bar width % to pixels
+      if (labelPositionPx + labelWidth > containerWidth) {
+          // If label would overflow, shift it left by its width
+        barPercentage.style.left = `calc(${barWidth}% - ${labelWidth}px)`;
+}
       // Change bar color based on ratio
       if (ratio < 65) {
         riskBar.style.backgroundColor = "#00FF00"; // Green
