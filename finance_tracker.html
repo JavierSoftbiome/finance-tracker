@@ -270,7 +270,7 @@
       // Calculate ratio (used for risk bar color)
       const ratio = (debt / collateralValue) * 100;
       const barWidth = Math.min(ratio, 100); // Cap at 100%
-      
+
       let rounded = Math.round(ratio); // 3
 
       // Update bar width
@@ -279,7 +279,7 @@
 
       // Move the ratio label to the bar’s end
       const barPercentage = document.getElementById("bar-percentage");
-      barPercentage.textContent = ratio.toFixed(2) + "%";
+      barPercentage.textContent = rounded.toFixed(2) + "%";
       barPercentage.style.left = barWidth + "%";
 
       // Change bar color based on ratio
