@@ -40,10 +40,12 @@
     /* The ratio label that appears BELOW the bar’s moving right edge */
     #bar-percentage {
       position: absolute;
-      bottom: -25px;    
+      bottom: -25px;
+      right: 0; /* Aligns to the right edge of the parent #risk-bar */
       color: #000;
       font-size: 0.8rem;
-    }
+      white-space: nowrap;
+}
 
     /* MARKERS */
     /* Common style for all markers */
@@ -275,30 +277,36 @@
       let rounded = Math.round(ratio); // 3
 
       // Update bar width
-      const riskBar = document.getElementById("risk-bar");
-      riskBar.style.width = barWidth + "%";
+const riskBar = document.getElementById("risk-bar");
+riskBar.style.width = barWidth + "%";
 
-      // Move the ratio label to the bar’s end
-      const barPercentage = document.getElementById("bar-percentage");
-      barPercentage.textContent = rounded.toFixed(0) + "%";
-      barPercentage.style.left = barWidth + "%"; // Align left edge of label with bar’s right edge
+// Update the ratio label
+const barPercentage = document.getElementById("bar-percentage");
+barPercentage.textContent = rounded.toFixed(0) + "%";
 
-      // Adjust label position to prevent overlap with bar
-      const labelWidth = barPercentage.offsetWidth; // Get the label’s width in pixels
-      const containerWidth = document.getElementById("risk-bar-container").offsetWidth;
-      const labelPositionPx = (barWidth / 100) * containerWidth; // Convert bar width % to pixels
-      if (labelPositionPx + labelWidth > containerWidth) {
-          // If label would overflow, shift it left by its width
-        barPercentage.style.left = `calc(${barWidth}% - ${labelWidth}px)`;
+// Reset any previous adjustments
+barPercentage.style.right = "0px"; // Default to right edge of bar
+
+// Check for overflow and adjust if needed
+const labelWidth = barPercentage.offsetWidth;
+const containerWidth = document.getElementById("risk-bar-container").offsetWidth;
+const barWidthPx = (barWidth / 100) * containerWidth;
+const labelPositionPx = barWidthPx - labelWidth;
+
+if (labelPositionPx + labelWidth > containerWidth) {
+  // If label would overflow, shift it left relative to the bar’s right edge
+  const overflowAmount = (labelPositionPx + labelWidth) - containerWidth;
+  barPercentage.style.right = `${-overflowAmount}px`;
 }
-      // Change bar color based on ratio
-      if (ratio < 65) {
-        riskBar.style.backgroundColor = "#00FF00"; // Green
-      } else if (ratio < 75) {
-        riskBar.style.backgroundColor = "#FFD700"; // Yellow
-      } else {
-        riskBar.style.backgroundColor = "#FF0000"; // Red
-      }
+
+// Change bar color based on ratio
+if (ratio < 65) {
+  riskBar.style.backgroundColor = "#00FF00"; // Green
+} else if (ratio < 75) {
+  riskBar.style.backgroundColor = "#FFD700"; // Yellow
+} else {
+  riskBar.style.backgroundColor = "#FF0000"; // Red
+}
 
       // Calculate liquidation risk
       const liquidationPrice = debt / (0.9 * collateral);
