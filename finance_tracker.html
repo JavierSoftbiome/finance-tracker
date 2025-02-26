@@ -42,6 +42,7 @@
       position: absolute;
       bottom: -25px;
       right: 0; /* Aligns to the right edge of the parent #risk-bar */
+      transform: translateX(50%); /* Centers the label by shifting it left by half its width */
       color: #000;
       font-size: 0.8rem;
       white-space: nowrap;
@@ -286,17 +287,22 @@ barPercentage.textContent = rounded.toFixed(0) + "%";
 
 // Reset any previous adjustments
 barPercentage.style.right = "0px"; // Default to right edge of bar
+barPercentage.style.transform = "translateX(50%)"; // Center it
 
 // Check for overflow and adjust if needed
 const labelWidth = barPercentage.offsetWidth;
 const containerWidth = document.getElementById("risk-bar-container").offsetWidth;
 const barWidthPx = (barWidth / 100) * containerWidth;
-const labelPositionPx = barWidthPx - labelWidth;
+const labelCenterPx = barWidthPx - (labelWidth / 2); // Center point of label in pixels
 
-if (labelPositionPx + labelWidth > containerWidth) {
-  // If label would overflow, shift it left relative to the bar’s right edge
-  const overflowAmount = (labelPositionPx + labelWidth) - containerWidth;
+if (labelCenterPx + (labelWidth / 2) > containerWidth) {
+  // If right edge of label overflows, shift it left
+  const overflowAmount = (labelCenterPx + (labelWidth / 2)) - containerWidth;
   barPercentage.style.right = `${-overflowAmount}px`;
+} else if (labelCenterPx - (labelWidth / 2) < 0) {
+  // If left edge of label goes below 0, shift it right
+  const underflowAmount = Math.abs(labelCenterPx - (labelWidth / 2));
+  barPercentage.style.right = `${underflowAmount}px`;
 }
 
 // Change bar color based on ratio
