@@ -270,8 +270,8 @@
       // Calculate ratio (used for risk bar color)
       const ratio = (debt / collateralValue) * 100;
       const barWidth = Math.min(ratio, 100); // Cap at 100%
-      let value = ratio;
-      let rounded = Math.round(value); // 3
+      
+      let rounded = Math.round(ratio); // 3
 
       // Update bar width
       const riskBar = document.getElementById("risk-bar");
