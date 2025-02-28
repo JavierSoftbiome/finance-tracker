@@ -46,7 +46,7 @@
       color: #000;
       font-size: 0.8rem;
       white-space: nowrap;
-}
+    }
 
     /* MARKERS */
     /* Common style for all markers */
@@ -71,8 +71,6 @@
     #marker-90 {
       left: 90%;
       background-color: #FF0000; /* Red */
-  
-      
     }
     #marker-90-label {
       position: absolute;
@@ -81,9 +79,8 @@
       transform: translateX(-50%);
       font-size: 0.7rem;
       text-align: center;
-      color: #ff4a4a;              /* Adjust if your background is dark or light */
+      color: #ff4a4a;           /* Adjust if your background is dark or light */
     }
-
   </style>
 </head>
 <body>
@@ -170,8 +167,6 @@
               <div class="row">
                 <div class="col-12">
                   <p style="margin-bottom: 5px;">Debt-Collateral Ratio</p>
-
-
                   <div id="risk-bar-container">
                     <!-- The bar fill -->
                     <div id="risk-bar">
@@ -190,8 +185,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Legend removed as requested -->
             </div>
           </div>
         </div>
@@ -234,12 +227,9 @@
     function calculate() {
       const debt = parseFloat(document.getElementById("debt").value);
       const collateral = parseFloat(document.getElementById("collateral").value);
-      const reservePercent = parseFloat(
-        document.getElementById("reserve-percent").value
-      );
+      const reservePercent = parseFloat(document.getElementById("reserve-percent").value);
 
       if (isNaN(debt) || isNaN(collateral) || isNaN(reservePercent)) {
-        // If any field is empty or invalid, do nothing
         return;
       }
 
@@ -248,16 +238,10 @@
         return;
       }
 
-      // Collateral Value in USD
       const collateralValue = collateral * ethPrice;
-      document.getElementById("collateral-value-result").textContent =
-        isNaN(collateralValue)
-          ? "N/A USD"
-          : collateralValue.toLocaleString("en-US", {
-              style: "decimal",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }) + " USD";
+      document.getElementById("collateral-value-result").textContent = isNaN(collateralValue)
+        ? "N/A USD"
+        : collateralValue.toLocaleString("en-US", { style: "decimal", minimumFractionDigits: 0, maximumFractionDigits: 0 }) + " USD";
 
       if (collateral === 0) {
         document.getElementById("liquidation-risk").textContent = "N/A";
@@ -266,98 +250,76 @@
         const riskBar = document.getElementById("risk-bar");
         riskBar.style.width = "0%";
         riskBar.style.backgroundColor = "grey";
-        // Clear the ratio label
         document.getElementById("bar-percentage").textContent = "";
+        document.getElementById("marker-90-label").style.display = "block"; // Show label when bar is at 0%
         return;
       }
 
-      // Calculate ratio (used for risk bar color)
       const ratio = (debt / collateralValue) * 100;
-      const barWidth = Math.min(ratio, 100); // Cap at 100%
+      const barWidth = Math.min(ratio, 100);
+      let rounded = Math.round(ratio);
 
-      let rounded = Math.round(ratio); // 3
+      const riskBar = document.getElementById("risk-bar");
+      riskBar.style.width = barWidth + "%";
 
-      // Update bar width
-const riskBar = document.getElementById("risk-bar");
-riskBar.style.width = barWidth + "%";
+      const barPercentage = document.getElementById("bar-percentage");
+      barPercentage.textContent = rounded.toFixed(0) + "%";
 
-// Update the ratio label
-const barPercentage = document.getElementById("bar-percentage");
-barPercentage.textContent = rounded.toFixed(0) + "%";
+      barPercentage.style.right = "0px";
+      barPercentage.style.transform = "translateX(50%)";
 
-// Reset any previous adjustments
-barPercentage.style.right = "0px"; // Default to right edge of bar
-barPercentage.style.transform = "translateX(50%)"; // Center it
+      const labelWidth = barPercentage.offsetWidth;
+      const containerWidth = document.getElementById("risk-bar-container").offsetWidth;
+      const barWidthPx = (barWidth / 100) * containerWidth;
+      const labelCenterPx = barWidthPx - (labelWidth / 2);
 
-// Check for overflow and adjust if needed
-const labelWidth = barPercentage.offsetWidth;
-const containerWidth = document.getElementById("risk-bar-container").offsetWidth;
-const barWidthPx = (barWidth / 100) * containerWidth;
-const labelCenterPx = barWidthPx - (labelWidth / 2); // Center point of label in pixels
+      if (labelCenterPx + (labelWidth / 2) > containerWidth) {
+        const overflowAmount = (labelCenterPx + (labelWidth / 2)) - containerWidth;
+        barPercentage.style.right = `${-overflowAmount}px`;
+      } else if (labelCenterPx - (labelWidth / 2) < 0) {
+        const underflowAmount = Math.abs(labelCenterPx - (labelWidth / 2));
+        barPercentage.style.right = `${underflowAmount}px`;
+      }
 
-if (labelCenterPx + (labelWidth / 2) > containerWidth) {
-  // If right edge of label overflows, shift it left
-  const overflowAmount = (labelCenterPx + (labelWidth / 2)) - containerWidth;
-  barPercentage.style.right = `${-overflowAmount}px`;
-} else if (labelCenterPx - (labelWidth / 2) < 0) {
-  // If left edge of label goes below 0, shift it right
-  const underflowAmount = Math.abs(labelCenterPx - (labelWidth / 2));
-  barPercentage.style.right = `${underflowAmount}px`;
-}
+      // Hide the 90% liquidation label when percentage is close (e.g., within 5% of 90%)
+      const marker90Label = document.getElementById("marker-90-label");
+      if (rounded >= 85) { // Adjust this threshold (e.g., 85) as needed
+        marker90Label.style.display = "none";
+      } else {
+        marker90Label.style.display = "block";
+      }
 
-// Change bar color based on ratio
-if (ratio < 65) {
-  riskBar.style.backgroundColor = "#00FF00"; // Green
-} else if (ratio < 75) {
-  riskBar.style.backgroundColor = "#FFD700"; // Yellow
-} else {
-  riskBar.style.backgroundColor = "#FF0000"; // Red
-}
+      if (ratio < 65) {
+        riskBar.style.backgroundColor = "#00FF00";
+      } else if (ratio < 75) {
+        riskBar.style.backgroundColor = "#FFD700";
+      } else {
+        riskBar.style.backgroundColor = "#FF0000";
+      }
 
-      // Calculate liquidation risk
       const liquidationPrice = debt / (0.9 * collateral);
       if (ethPrice > liquidationPrice) {
         const dropAllowed = ((ethPrice - liquidationPrice) / ethPrice) * 100;
-        // Show negative drop as requested
-        document.getElementById("liquidation-risk").textContent =
-          "-" + dropAllowed.toFixed(2) + "%";
-
-        // Show the "ETH Price Limit" row
-        const limitValue = liquidationPrice.toLocaleString("en-US", {
-          style: "decimal",
-          minimumFractionDigits: 0,
-          maximumFractionDigits: 0,
-        });
+        document.getElementById("liquidation-risk").textContent = "-" + dropAllowed.toFixed(2) + "%";
+        const limitValue = liquidationPrice.toLocaleString("en-US", { style: "decimal", minimumFractionDigits: 0, maximumFractionDigits: 0 });
         document.getElementById("eth-price-limit-row").style.display = "flex";
-        document.getElementById("eth-price-limit-value").textContent =
-          "$" + limitValue;
+        document.getElementById("eth-price-limit-value").textContent = "$" + limitValue;
       } else {
-        // Already at risk
-        document.getElementById("liquidation-risk").textContent =
-          "Currently at risk of liquidation";
+        document.getElementById("liquidation-risk").textContent = "Currently at risk of liquidation";
         document.getElementById("eth-price-limit-row").style.display = "none";
       }
 
-      // Recommended Cash Reserve
       const cashReserve = (reservePercent / 100) * debt;
-      document.getElementById("cash-reserve").textContent =
-        isNaN(cashReserve)
-          ? "N/A USD"
-          : cashReserve.toLocaleString("en-US", {
-              style: "decimal",
-              minimumFractionDigits: 0,
-              maximumFractionDigits: 0,
-            }) + " USD";
+      document.getElementById("cash-reserve").textContent = isNaN(cashReserve)
+        ? "N/A USD"
+        : cashReserve.toLocaleString("en-US", { style: "decimal", minimumFractionDigits: 0, maximumFractionDigits: 0 }) + " USD";
     }
 
     // Save input values to localStorage
     function saveInputs() {
       localStorage.setItem("debt", document.getElementById("debt").value);
       localStorage.setItem("collateral", document.getElementById("collateral").value);
-      localStorage.setItem(
-        "reservePercent",
-        document.getElementById("reserve-percent").value
-      );
+      localStorage.setItem("reservePercent", document.getElementById("reserve-percent").value);
     }
 
     // Load input values from localStorage and auto-calculate
@@ -366,12 +328,10 @@ if (ratio < 65) {
         document.getElementById("debt").value = localStorage.getItem("debt");
       }
       if (localStorage.getItem("collateral")) {
-        document.getElementById("collateral").value =
-          localStorage.getItem("collateral");
+        document.getElementById("collateral").value = localStorage.getItem("collateral");
       }
       if (localStorage.getItem("reservePercent")) {
-        document.getElementById("reserve-percent").value =
-          localStorage.getItem("reservePercent");
+        document.getElementById("reserve-percent").value = localStorage.getItem("reservePercent");
       }
       calculate();
     }
