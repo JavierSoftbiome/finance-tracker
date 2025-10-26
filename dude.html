@@ -150,55 +150,53 @@
   }
 
   // ---------- UI ----------
-  function Bubble({ p }) {
-    const hasImage = !!(p.media && p.media.image);
-    return (
-      <div
-        style={{
-          width: DIAM,
-          height: DIAM,
-          borderRadius: DIAM,
-          background: hasImage ? "#0a0a0a" : "radial-gradient(70px 70px at 50% 45%, #1a1a1a, #0a0a0a)",
-          border: "0px solid #2a2a2a",
-          boxShadow: "0 6px 22px rgba(0,0,0,0.4)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#eaeaea",
-          fontSize: 12,
-          textAlign: "center",
-          padding: 8,
-          userSelect: "none",
-        }}
-        title={`${p.title} (${p.year} • ${p.programme})`}
-      >
-        {hasImage ? (
-          <img src={(p.media && p.media.image) || PX} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: DIAM }} />
-        ) : (
-          <span>{p.title}</span>
-        )}
-      </div>
-    );
-  }
+function Bubble({ p }) {
+  const hasImage = !!(p.media && p.media.image);
+  const baseStyle = {
+    width: DIAM,
+    height: DIAM,
+    borderRadius: "50%",
+    overflow: "hidden",           // <-- clips any edge halo
+    border: "none",               // <-- no border at all
+    outline: "none",
+    background: hasImage
+      ? "transparent"
+      : "radial-gradient(70px 70px at 50% 45%, #1a1a1a, #0a0a0a)",
+    boxShadow: "0 6px 22px rgba(0,0,0,0.4)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#eaeaea",
+    fontSize: 12,
+    textAlign: "center",
+    padding: 8,
+    userSelect: "none",
+    willChange: "transform",
+    backfaceVisibility: "hidden",
+  };
 
-  function Sidebar({ selectedTheme, setSelectedTheme, items }) {
-    const counts = useMemo(() => {
-      const m = new Map();
-      for (const p of items) { const k = (p.themes && p.themes[0]) || "other"; m.set(k, (m.get(k) || 0) + 1); }
-      return Array.from(m).sort((a, b) => a[0].localeCompare(b[0]));
-    }, [items]);
-    return (
-      <div style={{ background: "#0a0a0a", border: "1px solid #222", borderRadius: 10, padding: 8 }}>
-        <div style={{ fontSize: 12, color: "#aaa", marginBottom: 6 }}>Themes</div>
-        <button onClick={() => setSelectedTheme(null)} style={{ width: "100%", textAlign: "left", padding: "6px 8px", borderRadius: 8, border: 0, cursor: "pointer", background: selectedTheme === null ? "#1a1a1a" : "transparent", color: "#ddd" }}>All</button>
-        {counts.map(([t, n]) => (
-          <button key={t} onClick={() => setSelectedTheme(selectedTheme === t ? null : t)} style={{ width: "100%", textAlign: "left", padding: "6px 8px", borderRadius: 8, border: 0, cursor: "pointer", marginTop: 4, background: selectedTheme === t ? "#1f1f1f" : "transparent", color: "#ddd", display: "flex", justifyContent: "space-between" }}>
-            <span>{t}</span><span style={{ opacity: 0.7 }}>{n}</span>
-          </button>
-        ))}
-      </div>
-    );
-  }
+  return (
+    <div style={baseStyle} title={`${p.title} (${p.year} • ${p.programme})`}>
+      {hasImage ? (
+        <img
+          src={(p.media && p.media.image) || PX}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block",     // <-- removes default inline-gap
+            borderRadius: "inherit",
+            transform: "translateZ(0)", // <-- avoids subpixel seams on transforms
+          }}
+          alt={p.title}
+        />
+      ) : (
+        <span>{p.title}</span>
+      )}
+    </div>
+  );
+}
+
 
   // ---------- Main component ----------
   function TeachingArchive3D({ projects = SAFE }) {
