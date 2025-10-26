@@ -1,0 +1,303 @@
+<!doctype html> <html lang="en"> <head> <meta charset="utf-8" /> <title>Teaching Archive — Bubbles</title> <meta name="viewport" content="width=device-width,initial-scale=1" /> <!-- React + ReactDOM (dev builds) --> <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script> <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script> <!-- Babel to transform JSX in the browser --> <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script> <style> html, body { margin: 0; padding: 0; height: 100%; background: #000; } body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif; } </style> </head> <body> <div id="root"></div>
+
+    <script type="text/babel" data-presets="react">
+  const { useMemo, useState, useEffect, useRef } = React;
+
+  // ---------- Data + helpers ----------
+  const PX = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAOa7G8QAAAAASUVORK5CYII=";
+
+  const DEMO = [
+    { id: "p01", title: "Bioreceptive Facade Tiles", year: 2023, programme: "PG20", themes: ["bioreceptive", "material"], tags: ["mycelium"], summary: "Porous ceramic tiles seeded with spores.", media: { image: "" } },
+    { id: "p02", title: "Programmable Growth Pavilion", year: 2022, programme: "UG2", themes: ["adaptive", "robotics"], tags: ["kinematics"], summary: "Reconfiguration bots adjust lattice." },
+    { id: "p03", title: "Microclimate Urbanism", year: 2024, programme: "PG20", themes: ["climate", "data"], tags: ["CFD"], summary: "Canopies mitigate heat islands." },
+    { id: "edge-no-media", title: "Edge: No Media", year: 2021, programme: "PG20", themes: ["testing"], tags: ["edge"], summary: "Verifies media guards.", media: { image: "", video: "" } },
+    ...Array.from({ length: 20 }).map((_, i) => ({
+      id: `x${i}`,
+      title: `Project ${i + 4}`,
+      year: 2020 + (i % 5),
+      programme: i % 2 ? "PG20" : "UG2",
+      themes: [i % 3 === 0 ? "bioreceptive" : i % 3 === 1 ? "adaptive" : "climate"],
+      tags: ["tagA", "tagB"],
+      summary: "Generated demo project.",
+    })),
+  ];
+
+  function withMediaGuards(p) {
+    const media = p.media || {};
+    const image = media.image && media.image.trim() !== "" ? media.image : PX;
+    const poster = media.poster && media.poster.trim() !== "" ? media.poster : image;
+    const video = media.video && media.video.trim() !== "" ? media.video : undefined;
+    return { ...p, media: { image, poster, video } };
+  }
+
+  const SAFE = Object.freeze(DEMO.map(withMediaGuards));
+
+  const norm = (s) => s.toLowerCase().normalize("NFKD");
+  function filterProjects(projects, query) {
+    const q = norm(query.trim());
+    if (!q) return projects;
+    return projects.filter((p) =>
+      [p.title, p.programme, String(p.year), ...(p.themes || []), ...(p.tags || [])]
+        .map(norm)
+        .join(" ")
+        .includes(q)
+    );
+  }
+
+  // ---------- Physics + layout ----------
+  const UNIT = 70; // px per world unit
+  const DIAM = 140; // bubble diameter px
+  const RAD_UNITS = (DIAM / 2) / UNIT; // bubble radius in world units
+  const GAP_PX = 30;
+
+  function themeCenters(projects) {
+    const names = [...new Set(projects.map((p) => p.themes[0] || "other"))];
+    const m = new Map();
+    const R = 9;
+    names.forEach((t, i) => {
+      const a = (i / Math.max(1, names.length)) * Math.PI * 2;
+      m.set(t, { x: Math.cos(a) * R, y: Math.sin(a) * R * 0.5, z: 0 });
+    });
+    return m;
+  }
+
+  function targetsFor(layout, items) {
+    switch (layout) {
+      case "themes": {
+        const centers = themeCenters(items);
+        return items.map((p, i) => {
+          const key = p.themes[0] || "other";
+          const c = centers.get(key);
+          const j = (i * 0.618) % 1;
+          return { x: c.x + (j - 0.5) * 1.2, y: c.y + (0.5 - j) * 0.8, z: 0 };
+        });
+      }
+      case "timeline": {
+        const years = [...new Set(items.map((p) => p.year))].sort((a, b) => a - b);
+        const byYear = new Map(); years.forEach((y, i) => byYear.set(y, i));
+        const xStep = Math.max((DIAM + GAP_PX) / UNIT, 3.2);
+        return items.map((p) => {
+          const xi = byYear.get(p.year) || 0;
+          return { x: (xi - (years.length - 1) / 2) * xStep, y: 0, z: 0 };
+        });
+      }
+      case "grid": {
+        const cols = 6;
+        const gap = (DIAM + GAP_PX) / UNIT;
+        return items.map((_, i) => ({ x: (i % cols - (cols - 1) / 2) * gap, y: (1 - Math.floor(i / cols)) * gap, z: 0 }));
+      }
+      default: { // organic
+        return items.map((_, i) => ({ x: Math.cos(i) * 2.5, y: Math.sin(i * 1.3) * 1.2, z: 0 }));
+      }
+    }
+  }
+
+  function resolveCollisions(pts, radiusUnits, passes = 2) {
+    const minDist = radiusUnits * 2, min2 = minDist * minDist;
+    for (let pass = 0; pass < passes; pass++) {
+      for (let i = 0; i < pts.length; i++) {
+        for (let j = i + 1; j < pts.length; j++) {
+          const a = pts[i], b = pts[j];
+          let dx = a.x - b.x, dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          if (d2 < min2 && d2 > 1e-9) {
+            const d = Math.sqrt(d2);
+            const overlap = (minDist - d) * 0.5;
+            dx /= d; dy /= d;
+            a.x += dx * overlap; a.y += dy * overlap;
+            b.x -= dx * overlap; b.y -= dy * overlap;
+          }
+        }
+      }
+    }
+  }
+
+  function forceStep(current, targets, opts) {
+    const n = current.length;
+    for (let iter = 0; iter < opts.iterations; iter++) {
+      // Spring toward targets
+      for (let i = 0; i < n; i++) {
+        const p = current[i];
+        const t = targets[i];
+        p.x += (t.x - p.x) * opts.spring;
+        p.y += (t.y - p.y) * opts.spring;
+        p.z += (t.z - p.z) * opts.spring * 0.5;
+      }
+      // Soft repulsion
+      for (let i = 0; i < n; i++) {
+        for (let j = i + 1; j < n; j++) {
+          const a = current[i];
+          const b = current[j];
+          let dx = a.x - b.x, dy = a.y - b.y;
+          const d2 = dx * dx + dy * dy;
+          const minR = opts.radiusUnits * 2;
+          if (d2 < minR * minR && d2 > 1e-6) {
+            const d = Math.sqrt(d2);
+            const f = (opts.repulse * (minR - d)) / Math.max(1e-6, d);
+            dx /= d; dy /= d;
+            a.x += dx * f; a.y += dy * f;
+            b.x -= dx * f; b.y -= dy * f;
+          }
+        }
+      }
+      // Deterministic collision fix
+      resolveCollisions(current, opts.radiusUnits, 1);
+      // Damping
+      for (let i = 0; i < n; i++) {
+        current[i].x *= opts.damping; current[i].y *= opts.damping; current[i].z *= opts.damping;
+      }
+    }
+  }
+
+  // ---------- UI ----------
+  function Bubble({ p }) {
+    const hasImage = !!(p.media && p.media.image);
+    return (
+      <div
+        style={{
+          width: DIAM,
+          height: DIAM,
+          borderRadius: DIAM,
+          background: hasImage ? "#0a0a0a" : "radial-gradient(70px 70px at 50% 45%, #1a1a1a, #0a0a0a)",
+          border: "1px solid #2a2a2a",
+          boxShadow: "0 6px 22px rgba(0,0,0,0.4)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#eaeaea",
+          fontSize: 12,
+          textAlign: "center",
+          padding: 8,
+          userSelect: "none",
+        }}
+        title={`${p.title} (${p.year} • ${p.programme})`}
+      >
+        {hasImage ? (
+          <img src={(p.media && p.media.image) || PX} style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: DIAM }} />
+        ) : (
+          <span>{p.title}</span>
+        )}
+      </div>
+    );
+  }
+
+  function Sidebar({ selectedTheme, setSelectedTheme, items }) {
+    const counts = useMemo(() => {
+      const m = new Map();
+      for (const p of items) { const k = (p.themes && p.themes[0]) || "other"; m.set(k, (m.get(k) || 0) + 1); }
+      return Array.from(m).sort((a, b) => a[0].localeCompare(b[0]));
+    }, [items]);
+    return (
+      <div style={{ background: "#0a0a0a", border: "1px solid #222", borderRadius: 10, padding: 8 }}>
+        <div style={{ fontSize: 12, color: "#aaa", marginBottom: 6 }}>Themes</div>
+        <button onClick={() => setSelectedTheme(null)} style={{ width: "100%", textAlign: "left", padding: "6px 8px", borderRadius: 8, border: 0, cursor: "pointer", background: selectedTheme === null ? "#1a1a1a" : "transparent", color: "#ddd" }}>All</button>
+        {counts.map(([t, n]) => (
+          <button key={t} onClick={() => setSelectedTheme(selectedTheme === t ? null : t)} style={{ width: "100%", textAlign: "left", padding: "6px 8px", borderRadius: 8, border: 0, cursor: "pointer", marginTop: 4, background: selectedTheme === t ? "#1f1f1f" : "transparent", color: "#ddd", display: "flex", justifyContent: "space-between" }}>
+            <span>{t}</span><span style={{ opacity: 0.7 }}>{n}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  // ---------- Main component ----------
+  function TeachingArchive3D({ projects = SAFE }) {
+    const [layout, setLayout] = useState("organic");
+    const [query, setQuery] = useState("");
+    const [selectedTheme, setSelectedTheme] = useState(null);
+
+    const all = projects;
+    const matches = useMemo(() => filterProjects(all, query), [all, query]);
+
+    const [pos, setPos] = useState(() => all.map((_, i) => ({ x: Math.cos(i) * 6, y: Math.sin(i) * 3, z: 0 })));
+    const targets = useMemo(() => targetsFor(layout, all), [layout, all]);
+
+    useEffect(() => {
+      let raf = 0;
+      const opts = { repulse: 0.24, spring: 0.06, damping: 0.992, radiusUnits: RAD_UNITS + (8 / UNIT), iterations: 3 };
+      const tick = () => {
+        setPos((prev) => {
+          const next = prev.map((p) => ({ ...p }));
+          forceStep(next, targets, opts);
+          return next;
+        });
+        raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+      return () => cancelAnimationFrame(raf);
+    }, [targets]);
+
+    const viewportRef = useRef(null);
+    const [fit, setFit] = useState(1);
+    useEffect(() => {
+      function computeFit() {
+        const el = viewportRef.current; if (!el) return;
+        const vw = el.clientWidth, vh = el.clientHeight;
+        if (pos.length === 0) return;
+        let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+        for (let i = 0; i < pos.length; i++) {
+          const x = pos[i].x * UNIT, y = pos[i].y * UNIT;
+          if (x < minX) minX = x; if (x > maxX) maxX = x;
+          if (y < minY) minY = y; if (y > maxY) maxY = y;
+        }
+        const w = (maxX - minX) + DIAM + GAP_PX * 2;
+        const h = (maxY - minY) + DIAM + GAP_PX * 2;
+        const s = Math.min(1, vw / Math.max(1, w), vh / Math.max(1, h));
+        setFit(s);
+      }
+      computeFit();
+      const ro = new ResizeObserver(computeFit);
+      if (viewportRef.current) ro.observe(viewportRef.current);
+      return () => ro.disconnect();
+    }, [pos, layout]);
+
+    const TRANS = "transform 700ms cubic-bezier(0.22,1,0.36,1), opacity 400ms ease";
+
+    return (
+      <div style={{ height: "100vh", width: "100%", overflow: "hidden", background: "#000", color: "#eee" }}>
+        {/* Toolbar */}
+        <div style={{ position: "fixed", top: 12, left: 12, right: 12, zIndex: 10, display: "flex", gap: 8, alignItems: "center" }}>
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search: bioreceptive, PG20, 2024…" style={{ flex: 1, padding: 10, borderRadius: 10, border: "1px solid #333", background: "#111", color: "#eee" }} />
+          <select value={layout} onChange={(e) => setLayout(e.target.value)} style={{ padding: 10, borderRadius: 10, border: "1px solid #333", background: "#111", color: "#eee" }}>
+            <option value="organic">Organic</option>
+            <option value="themes">Themes</option>
+            <option value="timeline">Timeline</option>
+            <option value="grid">Grid</option>
+          </select>
+        </div>
+
+        {/* Sidebar */}
+        <div style={{ position: "fixed", top: 60, left: 12, width: 190, bottom: 16, overflow: "auto", zIndex: 20 }}>
+          <Sidebar selectedTheme={selectedTheme} setSelectedTheme={setSelectedTheme} items={all} />
+        </div>
+
+        {/* Viewport */}
+        <div ref={viewportRef} style={{ position: "fixed", top: 56, left: 210, right: 0, bottom: 0, overflow: "hidden" }}>
+          <div style={{ position: "absolute", left: "50%", top: "50%", transform: `translate(-50%, -50%) scale(${fit})` }}>
+            {all.map((p, i) => {
+              const pt = pos[i] || { x: 0, y: 0, z: 0 };
+              const tx = pt.x * UNIT, ty = pt.y * UNIT;
+              const hit = matches.some((m) => m.id === p.id) || (selectedTheme ? p.themes.includes(selectedTheme) : false);
+              const opacity = hit ? 1 : 0.35;
+              const scale = hit ? 1.06 : 0.96;
+              return (
+                <div key={p.id} style={{ position: "absolute", transform: `translate(${tx}px, ${ty}px) scale(${scale})`, transition: TRANS, opacity }}>
+                  <Bubble p={p} />
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Hint */}
+        <div style={{ position: "fixed", bottom: 10, left: 12, right: 12, textAlign: "center", color: "#8a8a8a", fontSize: 12 }}>
+          Layouts share organic motion • Only clustering changes
+        </div>
+      </div>
+    );
+  }
+
+  const root = ReactDOM.createRoot(document.getElementById("root"));
+  root.render(<TeachingArchive3D />);
+</script>
+</body> </html>
