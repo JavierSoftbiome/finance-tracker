@@ -151,44 +151,46 @@
 
   // ---------- UI ----------
 function Bubble({ p }) {
-  const hasImage = !!(p.media && p.media.image);
-  const baseStyle = {
-    width: DIAM,
-    height: DIAM,
-    borderRadius: "50%",
-    overflow: "hidden",           // <-- clips any edge halo
-    border: "none",               // <-- no border at all
-    outline: "none",
-    background: hasImage
-      ? "transparent"
-      : "radial-gradient(70px 70px at 50% 45%, #1a1a1a, #0a0a0a)",
-    boxShadow: "0 6px 22px rgba(0,0,0,0.4)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "#eaeaea",
-    fontSize: 12,
-    textAlign: "center",
-    padding: 8,
-    userSelect: "none",
-    willChange: "transform",
-    backfaceVisibility: "hidden",
-  };
+  const imgSrc = p.media?.image;
+  const hasRealImage = !isPlaceholder(imgSrc);
 
   return (
-    <div style={baseStyle} title={`${p.title} (${p.year} • ${p.programme})`}>
-      {hasImage ? (
+    <div
+      style={{
+        width: DIAM,
+        height: DIAM,
+        borderRadius: "50%",
+        overflow: "hidden",
+        border: "none",
+        background: hasRealImage
+          ? "transparent"
+          : "radial-gradient(70px 70px at 50% 45%, #1a1a1a, #0a0a0a)",
+        boxShadow: "0 6px 22px rgba(0,0,0,0.4)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        color: "#eaeaea",
+        fontSize: 12,
+        textAlign: "center",
+        padding: 8,
+        userSelect: "none",
+        willChange: "transform",
+        backfaceVisibility: "hidden",
+      }}
+      title={`${p.title} (${p.year} • ${p.programme})`}
+    >
+      {hasRealImage ? (
         <img
-          src={(p.media && p.media.image) || PX}
+          src={imgSrc}
+          alt={p.title}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            display: "block",     // <-- removes default inline-gap
+            display: "block",
             borderRadius: "inherit",
-            transform: "translateZ(0)", // <-- avoids subpixel seams on transforms
+            transform: "translateZ(0)",
           }}
-          alt={p.title}
         />
       ) : (
         <span>{p.title}</span>
@@ -196,6 +198,7 @@ function Bubble({ p }) {
     </div>
   );
 }
+
 
 
   // ---------- Main component ----------
